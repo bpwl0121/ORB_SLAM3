@@ -1,5 +1,6 @@
 # Ignore all
 *
+!config_default
 
 # Unignore all with extensions
 !*.*

@@ -1,0 +1,17 @@
+{
+     ####### Directories #######
+
+     # intermediate results
+        "orb_pose_savedir": "./poses_orbslam/",
+    # data root
+	    "left_img_dir": "../../Downloads/data_tracking_image_2/training/image_02/",
+        "right_img_dir": "../../Downloads/data_tracking_image_2/training/image_03/",
+        "calibration_dir": "../../Downloads/data_tracking_calib/training/",
+
+    # pretrained models
+        "orbslam_modeldir": "./Examples_old/Stereo/",
+        "orbslam_vocab_dir": "./Vocabulary/ORBvoc.txt",
+
+	# mots eval
+        "mots_seqmap_file": "./fulltrain.seqmap",
+}
