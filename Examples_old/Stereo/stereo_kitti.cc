@@ -16,24 +16,28 @@
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include<iostream>
 #include<algorithm>
 #include<fstream>
 #include<iomanip>
 #include<chrono>
-
+#include <string>
+#include <iostream>
 #include<opencv2/core/core.hpp>
-
+#include <dirent.h>
 #include<System.h>
 
 using namespace std;
 
 void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
-                vector<string> &vstrImageRight, vector<double> &vTimestamps);
+                vector<string> &vstrImageRight);
 
 int main(int argc, char **argv)
 {
-    if(argc != 4)
+    if(argc != 5)
     {
         cerr << endl << "Usage: ./stereo_kitti path_to_vocabulary path_to_settings path_to_sequence" << endl;
         return 1;
@@ -42,8 +46,7 @@ int main(int argc, char **argv)
     // Retrieve paths to images
     vector<string> vstrImageLeft;
     vector<string> vstrImageRight;
-    vector<double> vTimestamps;
-    LoadImages(string(argv[3]), vstrImageLeft, vstrImageRight, vTimestamps);
+    LoadImages(string(argv[3]), vstrImageLeft, vstrImageRight);
 
     const int nImages = vstrImageLeft.size();
 
@@ -69,7 +72,7 @@ int main(int argc, char **argv)
         // Read left and right images from file
         imLeft = cv::imread(vstrImageLeft[ni],cv::IMREAD_UNCHANGED); //,cv::IMREAD_UNCHANGED);
         imRight = cv::imread(vstrImageRight[ni],cv::IMREAD_UNCHANGED); //,cv::IMREAD_UNCHANGED);
-        double tframe = vTimestamps[ni];
+        double tframe = ni * 0.1034;
 
         if(imLeft.empty())
         {
@@ -129,9 +132,9 @@ int main(int argc, char **argv)
         // Wait to load the next frame
         double T=0;
         if(ni<nImages-1)
-            T = vTimestamps[ni+1]-tframe;
+            T = 0.1034 + tframe;
         else if(ni>0)
-            T = tframe-vTimestamps[ni-1];
+            T = tframe - 0.1034;
 
         if(ttrack<T)
             usleep((T-ttrack)*1e6);
@@ -152,35 +155,34 @@ int main(int argc, char **argv)
     cout << "mean tracking time: " << totaltime/nImages << endl;
 
     // Save camera trajectory
-    SLAM.SaveTrajectoryKITTI("CameraTrajectory.txt");
+    SLAM.SaveTrajectoryKITTI(string(argv[4]) + "CameraTrajectory.txt");
 
     return 0;
 }
 
 void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
-                vector<string> &vstrImageRight, vector<double> &vTimestamps)
+                vector<string> &vstrImageRight)
 {
-    ifstream fTimes;
-    string strPathTimeFile = strPathToSequence + "/times.txt";
-    fTimes.open(strPathTimeFile.c_str());
-    while(!fTimes.eof())
-    {
-        string s;
-        getline(fTimes,s);
-        if(!s.empty())
-        {
-            stringstream ss;
-            ss << s;
-            double t;
-            ss >> t;
-            vTimestamps.push_back(t);
-        }
-    }
+    cout << "load images..." << endl;
+    string strPrefixLeft = strPathToSequence + "/image_2/";
+    string strPrefixRight = strPathToSequence + "/image_3/";
 
-    string strPrefixLeft = strPathToSequence + "/image_0/";
-    string strPrefixRight = strPathToSequence + "/image_1/";
+    int nTimes = 0;
 
-    const int nTimes = vTimestamps.size();
+      DIR *dp;
+      struct dirent *ep;
+      dp = opendir(strPrefixLeft.c_str());
+
+      if (dp != NULL)
+      {
+        while (ep = readdir (dp))
+          nTimes++;
+
+        (void) closedir (dp);
+      }
+      nTimes = nTimes -2;
+      cout << std::to_string(nTimes) << endl;
+
     vstrImageLeft.resize(nTimes);
     vstrImageRight.resize(nTimes);
 
@@ -191,4 +193,5 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
         vstrImageLeft[i] = strPrefixLeft + ss.str() + ".png";
         vstrImageRight[i] = strPrefixRight + ss.str() + ".png";
     }
+    cout << "done." << endl;
 }
