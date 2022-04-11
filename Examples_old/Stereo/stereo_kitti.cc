@@ -32,12 +32,12 @@
 
 using namespace std;
 
-void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
+void LoadImages(const string &strPrefixLeft, const string &strPrefixRight, vector<string> &vstrImageLeft,
                 vector<string> &vstrImageRight);
 
 int main(int argc, char **argv)
 {
-    if(argc != 5)
+    if(argc != 6)
     {
         cerr << endl << "Usage: ./stereo_kitti path_to_vocabulary path_to_settings path_to_sequence" << endl;
         return 1;
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     // Retrieve paths to images
     vector<string> vstrImageLeft;
     vector<string> vstrImageRight;
-    LoadImages(string(argv[3]), vstrImageLeft, vstrImageRight);
+    LoadImages(string(argv[3]), string(argv[4]),vstrImageLeft, vstrImageRight);
 
     const int nImages = vstrImageLeft.size();
 
@@ -155,17 +155,15 @@ int main(int argc, char **argv)
     cout << "mean tracking time: " << totaltime/nImages << endl;
 
     // Save camera trajectory
-    SLAM.SaveTrajectoryKITTI(string(argv[4]) + "CameraTrajectory.txt");
+    SLAM.SaveTrajectoryKITTI(string(argv[5]) + "CameraTrajectory.txt");
 
     return 0;
 }
 
-void LoadImages(const string &strPathToSequence, vector<string> &vstrImageLeft,
+void LoadImages(const string &strPrefixLeft, const string &strPrefixRight, vector<string> &vstrImageLeft,
                 vector<string> &vstrImageRight)
 {
     cout << "load images..." << endl;
-    string strPrefixLeft = strPathToSequence + "/image_2/";
-    string strPrefixRight = strPathToSequence + "/image_3/";
 
     int nTimes = 0;
 
