@@ -51,7 +51,7 @@ int main(int argc, char **argv)
     const int nImages = vstrImageLeft.size();
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::STEREO,true);
+    ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::STEREO,false);
     float imageScale = SLAM.GetImageScale();
 
     // Vector for tracking time statistics
@@ -132,9 +132,9 @@ int main(int argc, char **argv)
         // Wait to load the next frame
         double T=0;
         if(ni<nImages-1)
-            T = 0.1034 + tframe;
+            T = 0.1034;
         else if(ni>0)
-            T = tframe - 0.1034;
+            T = 0.1034;
 
         if(ttrack<T)
             usleep((T-ttrack)*1e6);
